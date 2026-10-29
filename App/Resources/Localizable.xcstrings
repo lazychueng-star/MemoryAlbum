@@ -1,0 +1,26 @@
+{
+  "sourceLanguage" : "zh-Hant",
+  "strings" : {
+    "app.name" : {
+      "localizations" : {
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "記憶小屋"
+          }
+        }
+      }
+    },
+    "app.subtitle" : {
+      "localizations" : {
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "收藏每一段被光照亮的回憶"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

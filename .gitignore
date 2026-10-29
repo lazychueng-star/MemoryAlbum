@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+
+# XcodeGen output
+*.xcodeproj/
+
+# Xcode
+DerivedData/
+*.xcresult
+*.xcuserstate
+xcuserdata/
+
+# Local builds and package state
+.build/
+.swiftpm/
