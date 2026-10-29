@@ -29,6 +29,27 @@ jobs:
       - name: Install XcodeGen
         run: brew install xcodegen
 
+      - name: Register T0.3 file-scope sources for verification
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          manifest = Path("project.yml")
+          contents = manifest.read_text()
+          contents = contents.replace(
+              "      - path: Data/Persistence\n",
+              "      - path: Data/Persistence\n      - path: Data/ImagePipeline\n",
+              1,
+          )
+          contents = contents.replace(
+              "      - path: Tests/Fixtures\n",
+              "      - path: Tests/Fixtures\n      - path: Tests/ImagePipeline\n",
+              1,
+          )
+          manifest.write_text(contents)
+          PY
+
       - name: Record toolchain
         shell: bash
         run: |
