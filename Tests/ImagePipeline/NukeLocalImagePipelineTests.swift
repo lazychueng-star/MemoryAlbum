@@ -203,11 +203,14 @@ private struct NukeImageGateFixtures {
         cacheProofURL = directory.appendingPathComponent("cache-proof.jpg")
         try FileManager.default.copyItem(at: jpegFixtures[0].url, to: cacheProofURL)
 
-        rapidURLs = try (0..<50).map { index in
+        let sourceURL = heicURL
+        var rapidURLs: [URL] = []
+        for index in 0..<50 {
             let url = directory.appendingPathComponent("rapid-\(index).heic")
-            try FileManager.default.linkItem(at: heicURL, to: url)
-            return url
+            try FileManager.default.linkItem(at: sourceURL, to: url)
+            rapidURLs.append(url)
         }
+        self.rapidURLs = rapidURLs
     }
 
     func remove() {
