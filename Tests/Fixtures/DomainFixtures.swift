@@ -1,4 +1,5 @@
 import Foundation
+@testable import MemoryAlbum
 
 struct MissingFileFixture: Sendable {
     let photo: PhotoItemEntity
