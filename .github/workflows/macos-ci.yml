@@ -112,6 +112,28 @@ jobs:
               --output-path "$attachments_dir" >/dev/null
             evidence="$(grep -R -h 'NUKE_GATE' "$attachments_dir" || true)"
           fi
+          if [[ -z "$evidence" ]]; then
+            simulator_id="$(
+              xcrun simctl list devices available |
+                awk '/iPhone/ {
+                  if (match($0, /\([0-9A-Fa-f-]+\)/)) {
+                    print substr($0, RSTART + 1, RLENGTH - 2)
+                    exit
+                  }
+                }'
+            )"
+            nuke_gate_log=".build/nuke-gate.log"
+            set -o pipefail
+            xcodebuild \
+              -project MemoryAlbum.xcodeproj \
+              -scheme MemoryAlbum \
+              -configuration Debug \
+              -destination "platform=iOS Simulator,id=${simulator_id}" \
+              -derivedDataPath .build/DerivedData \
+              -only-testing:MemoryAlbumTests/NukeLocalImagePipelineTests/testNukeLocalImageGate \
+              test-without-building 2>&1 | tee "$nuke_gate_log"
+            evidence="$(grep -E 'NUKE_GATE' "$nuke_gate_log" || true)"
+          fi
           if [[ -n "$evidence" ]]; then
             {
               echo "### T0.3 Nuke gate"
