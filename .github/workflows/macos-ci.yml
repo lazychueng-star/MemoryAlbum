@@ -100,6 +100,18 @@ jobs:
         shell: bash
         run: |
           evidence="$(grep -E 'NUKE_GATE' verify.log || true)"
+          if [[ -z "$evidence" ]]; then
+            result_bundle="$(
+              find .build/DerivedData/Logs/Test -type d -name '*.xcresult' -print |
+                sort | tail -n 1
+            )"
+            attachments_dir=".build/T0.3Attachments"
+            mkdir -p "$attachments_dir"
+            xcrun xcresulttool export attachments \
+              --path "$result_bundle" \
+              --output-path "$attachments_dir" >/dev/null
+            evidence="$(grep -R -h 'NUKE_GATE' "$attachments_dir" || true)"
+          fi
           if [[ -n "$evidence" ]]; then
             {
               echo "### T0.3 Nuke gate"

@@ -104,7 +104,7 @@ final class NukeLocalImagePipelineTests: XCTestCase {
         XCTAssertEqual(cacheAfterRelease.costBytes, 0)
         XCTAssertNil(weakImage.image)
 
-        print(
+        let gateEvidence =
             "NUKE_GATE heic_48mp_gallery_ms=\(heicGalleryMilliseconds) "
                 + "heic_48mp_gallery_px=\(gallerySize.width)x\(gallerySize.height) "
                 + "heic_48mp_thumbnail_px=\(thumbnailSize.width)x\(thumbnailSize.height) "
@@ -115,7 +115,11 @@ final class NukeLocalImagePipelineTests: XCTestCase {
                 + "cache_before_release_count=\(cacheBeforeRelease.count) "
                 + "cache_before_release_bytes=\(cacheBeforeRelease.costBytes) "
                 + "cache_after_release_count=\(cacheAfterRelease.count)"
-        )
+        let attachment = XCTAttachment(string: gateEvidence)
+        attachment.name = "NUKE_GATE"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+        print(gateEvidence)
     }
 
     private func makeWeakGalleryImage(
