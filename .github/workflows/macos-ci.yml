@@ -37,6 +37,8 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
+          pattern='error:|Testing failed|BUILD FAILED|Test Case .* failed|Command .* failed|\*\* TEST FAILED \*\*'
+
           if bash scripts/verify.sh fast 2>&1 | tee verify.log; then
             exit 0
           fi
@@ -44,23 +46,19 @@ jobs:
           {
             echo "### Fast verification failed"
             echo '```text'
-            grep -E 'error:|Testing failed|BUILD FAILED|Test Case .* failed|** TEST FAILED **' verify.log |
-              tail -n 30 || true
+            grep -E "$pattern" verify.log | tail -n 80 || true
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
           details="$(
-            grep -E 'error:|Testing failed|BUILD FAILED|Test Case .* failed|** TEST FAILED **' verify.log |
-              tail -n 5 || true
+            grep -E "$pattern" verify.log | tail -n 20 || true
           )"
           if [[ -z "$details" ]]; then
-            details="$(tail -n 5 verify.log)"
+            details="$(tail -n 20 verify.log)"
           fi
 
-          while IFS= read -r line; do
-            line="${line//'%'/'%25'}"
-            line="${line//$'\r'/'%0D'}"
-            line="${line//$'\n'/'%0A'}"
-            echo "::error title=Fast verification::${line}"
-          done <<< "$details"
+          details="${details//'%'/'%25'}"
+          details="${details//$'\r'/'%0D'}"
+          details="${details//$'\n'/'%0A'}"
+          echo "::error title=Fast verification::${details}"
           exit 1
