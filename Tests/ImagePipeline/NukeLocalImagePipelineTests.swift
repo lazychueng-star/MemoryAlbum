@@ -115,7 +115,10 @@ final class NukeLocalImagePipelineTests: XCTestCase {
                 + "cache_before_release_count=\(cacheBeforeRelease.count) "
                 + "cache_before_release_bytes=\(cacheBeforeRelease.costBytes) "
                 + "cache_after_release_count=\(cacheAfterRelease.count)"
-        let attachment = XCTAttachment(string: gateEvidence)
+        let attachment = XCTAttachment(
+            data: Data(gateEvidence.utf8),
+            uniformTypeIdentifier: UTType.plainText.identifier
+        )
         attachment.name = "NUKE_GATE"
         attachment.lifetime = .keepAlways
         add(attachment)
