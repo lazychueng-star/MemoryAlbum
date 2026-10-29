@@ -30,11 +30,19 @@ jobs:
         run: brew install xcodegen
 
       - name: Record toolchain
+        shell: bash
         run: |
-          xcode-select -p
-          xcodebuild -version
-          xcrun swift --version
-          xcodegen --version
+          toolchain="$({
+            xcode-select -p
+            xcodebuild -version
+            xcrun swift --version
+            xcodegen --version
+          } 2>&1)"
+          printf '%s\n' "$toolchain"
+          toolchain="${toolchain//'%'/'%25'}"
+          toolchain="${toolchain//$'\r'/'%0D'}"
+          toolchain="${toolchain//$'\n'/'%0A'}"
+          echo "::notice title=Toolchain::${toolchain}"
 
       - name: Run fast verification
         shell: bash
@@ -65,3 +73,22 @@ jobs:
           details="${details//$'\n'/'%0A'}"
           echo "::error title=Fast verification::${details}"
           exit 1
+
+      - name: Publish test summary
+        if: success()
+        shell: bash
+        run: |
+          result_bundle="$(
+            find .build/DerivedData/Logs/Test -type d -name '*.xcresult' -print |
+              sort | tail -n 1
+          )"
+          test_summary="$(
+            xcrun xcresulttool get test-results summary \
+              --path "$result_bundle" \
+              --format json
+          )"
+          printf '%s\n' "$test_summary"
+          test_summary="${test_summary//'%'/'%25'}"
+          test_summary="${test_summary//$'\r'/'%0D'}"
+          test_summary="${test_summary//$'\n'/'%0A'}"
+          echo "::notice title=Test summary::${test_summary}"
