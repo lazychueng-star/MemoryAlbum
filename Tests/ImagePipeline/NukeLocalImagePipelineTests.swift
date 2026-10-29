@@ -19,14 +19,16 @@ final class NukeLocalImagePipelineTests: XCTestCase {
         let heicGallery = try await heicFileLoad.image
         let heicGalleryMilliseconds = elapsedMilliseconds(since: heicGalleryStart)
         let gallerySize = try pixelSize(of: heicGallery)
-        XCTAssertLessThanOrEqual(max(gallerySize.width, gallerySize.height), 1_000)
+        XCTAssertEqual(gallerySize.width, 1_000)
+        XCTAssertEqual(gallerySize.height, 750)
 
         let heicThumbnail = try await loader.loadFile(
             at: fixtures.heicURL,
             variant: .thumbnail
         ).image
         let thumbnailSize = try pixelSize(of: heicThumbnail)
-        XCTAssertLessThanOrEqual(max(thumbnailSize.width, thumbnailSize.height), 320)
+        XCTAssertEqual(thumbnailSize.width, 320)
+        XCTAssertEqual(thumbnailSize.height, 240)
 
         let heicDataLoad = await loader.loadData(
             fixtures.heicData,
@@ -35,7 +37,8 @@ final class NukeLocalImagePipelineTests: XCTestCase {
         )
         let heicDataImage = try await heicDataLoad.image
         let dataImageSize = try pixelSize(of: heicDataImage)
-        XCTAssertLessThanOrEqual(max(dataImageSize.width, dataImageSize.height), 1_000)
+        XCTAssertEqual(dataImageSize.width, 1_000)
+        XCTAssertEqual(dataImageSize.height, 750)
 
         let jpegStart = Date()
         for fixture in fixtures.jpegFixtures {
@@ -44,7 +47,8 @@ final class NukeLocalImagePipelineTests: XCTestCase {
                 variant: .thumbnail
             ).image
             let size = try pixelSize(of: image)
-            XCTAssertLessThanOrEqual(max(size.width, size.height), 320)
+            XCTAssertEqual(size.width, 320)
+            XCTAssertEqual(size.height, 240)
             XCTAssertTrue(fixture.isTwelveMegapixel)
         }
         let jpegMilliseconds = elapsedMilliseconds(since: jpegStart)
@@ -54,8 +58,8 @@ final class NukeLocalImagePipelineTests: XCTestCase {
             variant: .gallery
         ).image
         let orientedSize = try pixelSize(of: orientedImage)
-        XCTAssertLessThanOrEqual(max(orientedSize.width, orientedSize.height), 1_000)
-        XCTAssertGreaterThan(orientedSize.height, orientedSize.width)
+        XCTAssertEqual(orientedSize.width, 750)
+        XCTAssertEqual(orientedSize.height, 1_000)
 
         let cancellationStart = Date()
         var supersededLoads: [LocalImageLoad] = []
@@ -72,7 +76,8 @@ final class NukeLocalImagePipelineTests: XCTestCase {
 
         let finalRapidImage = try await currentLoad.image
         let finalRapidSize = try pixelSize(of: finalRapidImage)
-        XCTAssertLessThanOrEqual(max(finalRapidSize.width, finalRapidSize.height), 1_000)
+        XCTAssertEqual(finalRapidSize.width, 1_000)
+        XCTAssertEqual(finalRapidSize.height, 750)
 
         var cancelledCount = 0
         for load in supersededLoads {
@@ -115,13 +120,6 @@ final class NukeLocalImagePipelineTests: XCTestCase {
                 + "cache_before_release_count=\(cacheBeforeRelease.count) "
                 + "cache_before_release_bytes=\(cacheBeforeRelease.costBytes) "
                 + "cache_after_release_count=\(cacheAfterRelease.count)"
-        let attachment = XCTAttachment(
-            data: Data(gateEvidence.utf8),
-            uniformTypeIdentifier: UTType.plainText.identifier
-        )
-        attachment.name = "NUKE_GATE"
-        attachment.lifetime = .keepAlways
-        add(attachment)
         print(gateEvidence)
     }
 
