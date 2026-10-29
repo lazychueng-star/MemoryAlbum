@@ -34,4 +34,33 @@ jobs:
           xcodegen --version
 
       - name: Run fast verification
-        run: bash scripts/verify.sh fast
+        shell: bash
+        run: |
+          set -o pipefail
+          if bash scripts/verify.sh fast 2>&1 | tee verify.log; then
+            exit 0
+          fi
+
+          {
+            echo "### Fast verification failed"
+            echo '```text'
+            grep -E 'error:|Testing failed|BUILD FAILED|Test Case .* failed|** TEST FAILED **' verify.log |
+              tail -n 30 || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          details="$(
+            grep -E 'error:|Testing failed|BUILD FAILED|Test Case .* failed|** TEST FAILED **' verify.log |
+              tail -n 5 || true
+          )"
+          if [[ -z "$details" ]]; then
+            details="$(tail -n 5 verify.log)"
+          fi
+
+          while IFS= read -r line; do
+            line="${line//'%'/'%25'}"
+            line="${line//$'\r'/'%0D'}"
+            line="${line//$'\n'/'%0A'}"
+            echo "::error title=Fast verification::${line}"
+          done <<< "$details"
+          exit 1
